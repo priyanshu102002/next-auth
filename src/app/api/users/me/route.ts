@@ -6,25 +6,32 @@ import { getDataFromToken } from "@/helper/getDataFromToken";
 connectDB();
 
 export async function POST(request: NextRequest) {
-	// Extract Data(id) from Token
-	const userId = await getDataFromToken(request);
+	try {
+		// Extract Data(id) from Token
+		const userId = await getDataFromToken(request);
 
-	const user = await User.findById(userId).select("-password");
+		const user = await User.findById(userId).select("-password");
 
-	if (!user) {
+		if (!user) {
+			return NextResponse.json(
+				{
+					error: "Invalid Token",
+				},
+				{ status: 401 }
+			);
+		}
+
 		return NextResponse.json(
 			{
-				error: "Invalid Token",
+				message: "User Found",
+				data: user,
 			},
-			{ status: 401 }
+			{ status: 200 }
+		);
+	} catch (error) {
+		return NextResponse.json(
+			{ error: "Something went wrong" },
+			{ status: 500 }
 		);
 	}
-
-	return NextResponse.json(
-		{
-			message: "User Found",
-			data: user,
-		},
-		{ status: 200 }
-	);
 }
